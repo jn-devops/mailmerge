@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Homeful\Mailmerge\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class MailmergeCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'mailmerge';
 
     public $description = 'My command';
 
