@@ -15,31 +15,33 @@ class Mailmerge
     public function requestDocument(Request $request){
         $fileDecode = base64_decode($request->DocumentBase64);
         $arrInput = json_decode($request->BodyInput, true);
+        $download = $request->ResponseType=="Download"?true:null;
         $fileName = $request->DocumentName?$request->DocumentName."_".time():time();
 
         if($request->isPublic)
         {
             Storage::disk('public')->put('mailmerge/temp/' .$fileName.'.docx', $fileDecode);
             $filePath = Storage::disk('public')->path('mailmerge/temp/' .$fileName.'.docx');
-            $response = $this->generateDocument($filePath, $arrInput, $fileName);
+            $response = $this->generateDocument($filePath, $arrInput, $fileName, $download);
             Storage::disk('public')->delete('mailmerge/temp/' .$fileName.'.docx');
         }
         else
         {
         Storage::put('public/temp/document/' .$fileName.'.docx', $fileDecode);
         $filePath = Storage::path('public/temp/document/' .$fileName.'.docx');
-        $response = $this->generateDocument($filePath, $arrInput, $fileName, "local" );
+        $response = $this->generateDocument($filePath, $arrInput, $fileName, "local", $download);
         Storage::delete('public/temp/document/' .$fileName.'.docx');
         }
         return $response;
     }
 
-    public function generateDocument($filePath,array $arrInput ,$filename = null, $disk = "public"){
+    public function generateDocument($filePath,array $arrInput ,$filename = null, $disk = "public",$download = null){
+
         if (!File::exists($filePath)) {
             return response()->json(['Error' => 'File not existing'], 500);
         }
         //create folder if not existing
-        if($disk = "public")
+        if($disk == "public")
         {
             if (!Storage::disk('public')->exists('mailmerge/converted_documents')) {
                 Storage::disk('public')->makeDirectory('mailmerge/converted_documents');
@@ -50,7 +52,7 @@ class Mailmerge
                 chmod(Storage::disk('public')->path('mailmerge/converted_pdf'), 0755);
             }  
         }
-        elseif($disk = "local")
+        elseif($disk == "local")
         {
             if (!Storage::exists('mailmerge/converted_documents')) {
                 Storage::makeDirectory('mailmerge/converted_documents');
@@ -91,55 +93,61 @@ class Mailmerge
     
 
         // $filePath = Storage::path('app/public/converted_documents/' . $filename . '_templated.docx');
-        if($disk = "public"){
+        if($disk == "public"){
             $filePath = Storage::disk('public')->path('mailmerge/converted_documents/' . $filename . '.docx');
             $outputFile = Storage::disk('public')->path('mailmerge/converted_pdf/');
             $outputDir = Storage::disk('public')->path('mailmerge/converted_pdf/');
             $pdfFile = Storage::disk('public')->path("mailmerge/converted_pdf/{$filename}.pdf"); 
         }
-        elseif($disk = "local")
+        elseif($disk == "local")
         {
             $filePath = Storage::path('mailmerge/converted_documents/' . $filename . '.docx'); 
             $outputFile = Storage::path('mailmerge/converted_pdf/');
             $outputDir = Storage::path('mailmerge/converted_pdf/');
             $pdfFile = Storage::path("mailmerge/converted_pdf/{$filename}.pdf"); 
         }
-        // $filePath = Storage::disk('public')->path('mailmerge/converted_documents/' . $filename . '.docx');
-
         $templateProcessor->saveAs($filePath);
         
-
-        // $outputFile = storage_path('app/public/converted_pdf/');
-        // $libreOfficePath = env('LIBREOFFICE_PATH', 'C:\Program Files\LibreOffice\program\soffice.exe');
-        // $outputDir = storage_path('app/public/converted_pdf/');
-        // $outputFile = Storage::disk('public')->path('mailmerge/converted_pdf/');s
         $libreOfficePath = env('LIBREOFFICE_PATH', 'C:\Program Files\LibreOffice\program\soffice.exe');
-        // $outputDir = Storage::disk('public')->path('mailmerge/converted_pdf/');
         $filePathEscaped = escapeshellarg($filePath);
         
         $command = "\"{$libreOfficePath}\" --headless --convert-to pdf:writer_pdf_Export --outdir \"{$outputDir}\" {$filePathEscaped}";
-        //dd($command);
-        // $command = env('LIBREOFFICE_PATH')." --headless --convert-to pdf:writer_pdf_Export --outdir '".storage_path('app/public/converted_pdf/'). "' " . escapeshellarg($filePath);
         try{
             exec($command, $outputFile, $return_var);
             // return $filePathEscaped;
             // $pdfFile = storage_path("app/public/converted_pdf/{$filename}_templated.pdf");
-            // $pdfFile = Storage::disk('public')->path("mailmerge/converted_pdf/{$filename}.pdf"); 
-
-            // $url = Storage::url(
-            //     $pdfFile,
-            //     now()->addMinutes(5),
-            //     [
-            //         'ResponseContentType' => 'application/octet-stream',
-            //         'ResponseContentDisposition' => "attachment; filename={$filename}_templated.jpg",
-            //     ]
-            // );
+            $pdfFile = Storage::disk('public')->path("mailmerge/converted_pdf/{$filename}.pdf"); 
             // echo $url;
-            if($disk = "public")
-            return Storage::disk('public')->download("mailmerge//converted_pdf//{$filename}.pdf",$filename);
-            elseif($disk = "local")
+
+            if($disk == "public")
             {
-            return Storage::download("mailmerge//converted_pdf//{$filename}.pdf",$filename);   
+                if($download)
+                {
+                    return Storage::disk('public')->download("mailmerge/converted_pdf/{$filename}.pdf",$filename);    
+                }
+                $pdfPath = Storage::disk('public')->path("mailmerge/converted_pdf/{$filename}.pdf"); 
+                return $pdfPath;
+            }
+            // return Storage::disk('public')->download("mailmerge//converted_pdf//{$filename}.pdf",$filename);
+            elseif($disk == "local")
+            {
+                // $url = Storage::url(
+                //     $pdfFile,
+                //     now()->addMinutes(5),
+                //     [
+                //         'ResponseContentType' => 'application/octet-stream',
+                //         'ResponseContentDisposition' => "attachment; filename={$filename}_templated.jpg",
+                //     ]
+                //         );
+                if($download)
+                {
+                    return Storage::download("mailmerge/converted_pdf/{$filename}.pdf",$filename);    
+                }
+                $pdfPath = Storage::path("mailmerge/converted_pdf/{$filename}.pdf"); 
+     
+                return $pdfPath;
+
+            // return Storage::download("mailmerge//converted_pdf//{$filename}.pdf",$filename);   
             }
             // return $url;
         }
@@ -156,5 +164,13 @@ class Mailmerge
         // } else {
         //     return response()->json(['error' => 'An error occurred during the file conversion'], 500);
         // }
+    }
+    public function downloadDocument($filePath,$filename, $disk = "public"){
+        if($disk == "public")
+        return Storage::disk('public')->download($filePath,$filename);
+        elseif($disk == "local")
+        {
+        return Storage::download($filePath,$filename);   
+        }
     }
 }
