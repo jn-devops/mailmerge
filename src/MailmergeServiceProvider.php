@@ -2,9 +2,9 @@
 
 namespace Homeful\Mailmerge;
 
+use Homeful\Mailmerge\Commands\MailmergeCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Homeful\Mailmerge\Commands\MailmergeCommand;
 
 class MailmergeServiceProvider extends PackageServiceProvider
 {

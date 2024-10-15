@@ -2,9 +2,9 @@
 
 namespace Homeful\Mailmerge\Tests;
 
+use Homeful\Mailmerge\MailmergeServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Homeful\Mailmerge\MailmergeServiceProvider;
 
 class TestCase extends Orchestra
 {
