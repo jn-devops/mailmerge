@@ -14,6 +14,9 @@ This is where your description should go. Limit it to a paragraph or two. Consid
 We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
 
 We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+## Requirement
+
+Install LibreOffice 
 
 ## Installation
 
@@ -51,9 +54,27 @@ php artisan vendor:publish --tag="mailmerge-views"
 
 ## Usage
 
+```ENV Setup```
+    'LIBREOFFICE_PATH'   = ""
+```ENV Setup```
 ```php
+
 $mailmerge = new Homeful\Mailmerge();
-echo $mailmerge->echoPhrase('Hello, Homeful!');
+```merge and convert document to PDF```
+echo $mailmerge->generateDocument(
+    $filePath, //file path in storage
+    $arrInput, //Json Input
+    $fileName, //optional
+    "local" , //optional if file is in local - default public
+    $download //optional boolean true need file download response 
+); //URL response
+```download document```
+echo $mailmerge->downloadDocument(
+    $filePath, //file path in storage
+    $filename, //optional  
+    "local" //optional if file is in local - default public
+    )
+
 ```
 
 ## Testing
