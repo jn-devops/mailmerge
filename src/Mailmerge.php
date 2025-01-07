@@ -180,7 +180,7 @@
             $responseBody = json_decode($res->getBody());//->getContents();
             return $responseBody->download_url;//->content;
         }
-
+        
         public function requestDocumentGithub(Request $request)
         {   
             $fileDecode = $this->getDocumentGithub($request->owner,$request->repo,$request->filepath);
@@ -191,6 +191,7 @@
             if ($request->isPublic) {
                 Storage::disk('public')->put('mailmerge/temp/'.$fileName.'.docx', Utils::streamFor(fopen($fileDecode, 'r')));
                 $filePath = Storage::disk('public')->path('mailmerge/temp/'.$fileName.'.docx');
+                
                 $response = $this->generateDocument($filePath, $arrInput, $fileName, $download);
                 Storage::disk('public')->delete('mailmerge/temp/'.$fileName.'.docx');
             } else {

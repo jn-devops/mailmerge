@@ -67,6 +67,14 @@ echo $mailmerge->generateDocument(
     $fileName, //optional
     "local" , //optional if file is in local - default public
     $download //optional boolean true need file download response 
+); 
+```merge and convert document to PDF```
+echo $mailmerge->generateDocument(
+    $filePath, //file path in storage
+    $arrInput, //Json Input
+    $fileName, //optional
+    "local" , //optional if file is in local - default public
+    $download //optional boolean true need file download response 
 ); //URL response
 ```download document```
 echo $mailmerge->downloadDocument(
