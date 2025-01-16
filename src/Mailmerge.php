@@ -41,7 +41,7 @@ class Mailmerge
         if (! File::exists($filePath)) {
             return response()->json(['Error' => 'File not existing'], 500);
         }
-        //create folder if not existing
+        // create folder if not existing
         if ($disk == 'public') {
             if (! Storage::disk('public')->exists('mailmerge/converted_documents')) {
                 Storage::disk('public')->makeDirectory('mailmerge/converted_documents');
@@ -82,7 +82,7 @@ class Mailmerge
             // echo htmlspecialchars($value??'') ;
             $templateProcessor->setValue($key, htmlspecialchars($value ?? ''));
         }
-        //set image
+        // set image
         //        $imagePath = storage_path('app/public/test_image.png');
         //        $templateProcessor->setImageValue('image', array('path' => $imagePath, 'width' => 100, 'height' => 100, 'ratio' => false));
 
@@ -173,34 +173,35 @@ class Mailmerge
         $headers = [
             'Authorization' => $token,
             'Accept' => 'application/vnd.github.v3+json',
-            'X-GitHub-Api-Version' => '2022-11-28'
-            ];
-            $client = new Client();
-            $request = new GuzzleRequest('GET', $getURL, $headers);
-            $res = $client->sendAsync($request)->wait();
-            $responseBody = json_decode($res->getBody());//->getContents();
-            return $responseBody->download_url;//->content;
-        }
+            'X-GitHub-Api-Version' => '2022-11-28',
+        ];
+        $client = new Client;
+        $request = new GuzzleRequest('GET', $getURL, $headers);
+        $res = $client->sendAsync($request)->wait();
+        $responseBody = json_decode($res->getBody()); // ->getContents();
 
-        public function requestDocumentGithub(Request $request)
-        {   
-            $fileDecode = $this->getDocumentGithub($request->owner,$request->repo,$request->filepath);
-            $arrInput = $request->bodyInput;//json_decode($request->bodyInput, true);
-            $download = $request->ResponseType == 'Download' ? true : null;
-            $fileName = $request->DocumentName ? $request->DocumentName.'_'.time() : time();
-
-            if ($request->isPublic) {
-                Storage::disk('public')->put('mailmerge/temp/'.$fileName.'.docx', Utils::streamFor(fopen($fileDecode, 'r')));
-                $filePath = Storage::disk('public')->path('mailmerge/temp/'.$fileName.'.docx');
-                $response = $this->generateDocument($filePath, $arrInput, $fileName, $download);
-                Storage::disk('public')->delete('mailmerge/temp/'.$fileName.'.docx');
-            } else {
-                Storage::put('public/temp/document/'.$fileName.'.docx', Utils::streamFor(fopen($fileDecode, 'r')));
-                $filePath = Storage::path('public/temp/document/'.$fileName.'.docx');
-                $response = $this->generateDocument($filePath, $arrInput, $fileName, 'local', $download);
-                Storage::delete('public/temp/document/'.$fileName.'.docx');
-            }
-            return $response;
-        }
-
+        return $responseBody->download_url; // ->content;
     }
+
+    public function requestDocumentGithub(Request $request)
+    {
+        $fileDecode = $this->getDocumentGithub($request->owner, $request->repo, $request->filepath);
+        $arrInput = $request->bodyInput; // json_decode($request->bodyInput, true);
+        $download = $request->ResponseType == 'Download' ? true : null;
+        $fileName = $request->DocumentName ? $request->DocumentName.'_'.time() : time();
+
+        if ($request->isPublic) {
+            Storage::disk('public')->put('mailmerge/temp/'.$fileName.'.docx', Utils::streamFor(fopen($fileDecode, 'r')));
+            $filePath = Storage::disk('public')->path('mailmerge/temp/'.$fileName.'.docx');
+            $response = $this->generateDocument($filePath, $arrInput, $fileName, $download);
+            Storage::disk('public')->delete('mailmerge/temp/'.$fileName.'.docx');
+        } else {
+            Storage::put('public/temp/document/'.$fileName.'.docx', Utils::streamFor(fopen($fileDecode, 'r')));
+            $filePath = Storage::path('public/temp/document/'.$fileName.'.docx');
+            $response = $this->generateDocument($filePath, $arrInput, $fileName, 'local', $download);
+            Storage::delete('public/temp/document/'.$fileName.'.docx');
+        }
+
+        return $response;
+    }
+}
