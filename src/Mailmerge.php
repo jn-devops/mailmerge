@@ -64,20 +64,18 @@ class Mailmerge
 
         $templateProcessor = new TemplateProcessor($filePath);
         $data = $arrInput;
-        foreach ($data as $key => &$value) {
-            // if (is_array($value)) {
-            //     foreach ($value as $subKey => &$subValue) {
-            //         if (is_null($subValue)) {
-            //             $subValue = '';
-            //         }
-            //     }
-            // } elseif (is_null($value)) {
-            //     $value = '';
-            // }
-            if (is_null($value)) {
-                $value = '';
-            }
-        }
+        
+        // foreach ($data as $key => &$value) {
+        //     if (is_array($value)) {
+        //         foreach ($value as $subKey => &$subValue) {
+        //             if (is_null($subValue)) {
+        //                 $subValue = '';
+        //             }
+        //         }
+        //     } elseif (is_null($value)) {
+        //         $value = '';
+        //     }
+        // }
 
         foreach ($data as $key => $value) {
 
