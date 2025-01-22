@@ -2,6 +2,10 @@
 
 All notable changes to `mailmerge` will be documented in this file.
 
+## v1.0.5 - 2025-01-22
+
+update generateDocument
+
 ## v1.0.4 - 2025-01-22
 
 removed nested array checking
