@@ -64,7 +64,7 @@ class Mailmerge
 
         $templateProcessor = new TemplateProcessor($filePath);
         $data = $arrInput;
-        
+
         // foreach ($data as $key => &$value) {
         //     if (is_array($value)) {
         //         foreach ($value as $subKey => &$subValue) {
