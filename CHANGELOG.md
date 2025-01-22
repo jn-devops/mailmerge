@@ -2,6 +2,10 @@
 
 All notable changes to `mailmerge` will be documented in this file.
 
+## v1.0.4 - 2025-01-22
+
+removed nested array checking
+
 ## v1.0.3 - 2025-01-16
 
 Fix space in mailmerge
